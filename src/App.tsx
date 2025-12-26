@@ -1,35 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import { useArrivals } from "./hooks/useArrivals";
+
+const DEFAULT_STOP_ID = "1_75403"; // pick your favorite Seattle stop
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [stopId, setStopId] = useState(DEFAULT_STOP_ID);
+  const { data, loading, error } = useArrivals(stopId);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div style={{ padding: "1rem", fontFamily: "system-ui" }}>
+      <h1>Seattle Transit Dashboard</h1>
+
+      <label>
+        Stop ID:
+        <input
+          value={stopId}
+          onChange={(e) => setStopId(e.target.value)}
+          style={{ marginLeft: "0.5rem" }}
+        />
+      </label>
+
+      {loading && <p>Loading arrivals…</p>}
+      {error && <p style={{ color: "red" }}>Error: {error.message}</p>}
+
+      {data && data.length === 0 && !loading && <p>No upcoming arrivals</p>}
+
+      {data && data.length > 0 && (
+        <table style={{ marginTop: "1rem", borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={{ textAlign: "left", padding: "0.5rem" }}>Route</th>
+              <th style={{ textAlign: "left", padding: "0.5rem" }}>Headsign</th>
+              <th style={{ textAlign: "left", padding: "0.5rem" }}>ETA</th>
+              <th style={{ textAlign: "left", padding: "0.5rem" }}>Predicted?</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((a) => (
+              <tr key={`${a.routeId}-${a.arrivalTimeEpochMs}`}>
+                <td style={{ padding: "0.5rem" }}>{a.routeShortName}</td>
+                <td style={{ padding: "0.5rem" }}>{a.headsign}</td>
+                <td style={{ padding: "0.5rem" }}>
+                  {Math.max(0, Math.round(a.etaSeconds / 60))} min
+                </td>
+                <td style={{ padding: "0.5rem" }}>
+                  {a.predicted ? "Yes" : "No"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
