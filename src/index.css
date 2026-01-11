@@ -22,12 +22,11 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   font-family: 'Share Tech Mono', monospace;
 }
 
 #root {
   width: 100%;
-  max-width: 800px;
   padding: 20px;
 }
