@@ -69,37 +69,61 @@
   min-height: 200px;
 }
 
-/* Individual Arrival Row */
-.arrival-row {
-  display: grid;
-  grid-template-columns: 80px 1fr auto;
-  gap: 16px;
-  align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #1a1a1a;
+/* Route Group */
+.route-group {
+  border-bottom: 1px solid #222;
+  padding: 12px 0;
 }
 
-.arrival-row:last-child {
+.route-group:last-child {
   border-bottom: none;
+}
+
+.route-header {
+  margin-bottom: 8px;
 }
 
 /* Route Badge */
 .route-badge {
   background: var(--led-blue);
   color: #000;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  padding: 6px 12px;
+  padding: 8px 16px;
   text-align: center;
   border-radius: 4px;
+  display: inline-block;
   min-width: 60px;
   box-shadow: 0 0 15px var(--led-blue-glow);
+}
+
+/* Directions List */
+.directions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 8px;
+}
+
+/* Direction Row */
+.direction-row {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.direction-indicator {
+  color: var(--led-blue-dim);
+  font-size: 18px;
+  text-align: center;
 }
 
 /* Destination */
 .destination {
   color: var(--led-blue);
-  font-size: 20px;
+  font-size: 18px;
   text-transform: uppercase;
   letter-spacing: 1px;
   text-shadow: 0 0 8px var(--led-blue-glow);
@@ -108,42 +132,54 @@
   text-overflow: ellipsis;
 }
 
-/* ETA Display */
-.eta {
-  text-align: right;
-  min-width: 100px;
+/* ETA Display - Grouped */
+.eta-group {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
-.eta-minutes {
+.eta-item {
   color: var(--led-blue);
-  font-size: 32px;
+  font-size: 28px;
   font-weight: bold;
   text-shadow: 0 0 15px var(--led-blue-glow);
   line-height: 1;
 }
 
-.eta-label {
+.eta-item:not(:last-child)::after {
+  content: ",";
   color: var(--led-blue-dim);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  margin-left: -2px;
 }
 
-.eta-now {
+.eta-unit {
+  font-size: 12px;
+  color: var(--led-blue-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-left: 4px;
+  font-weight: normal;
+}
+
+.eta-item.eta-now {
   color: var(--led-green);
   text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
 }
 
-/* Scheduled (not real-time) indicator */
-.scheduled {
-  opacity: 0.6;
-}
-
-.scheduled .eta-minutes {
+.eta-item.eta-scheduled {
   color: var(--led-blue-dim);
+  opacity: 0.7;
 }
 
-.scheduled .destination {
+/* Scheduled (not real-time) indicator */
+.direction-row.scheduled {
+  opacity: 0.7;
+}
+
+.direction-row.scheduled .destination {
   color: var(--led-blue-dim);
 }
 
