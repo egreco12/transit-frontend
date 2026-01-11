@@ -2,57 +2,109 @@ import { useState } from "react";
 import "./App.css";
 import { useArrivals } from "./hooks/useArrivals";
 
-const DEFAULT_STOP_ID = "1_75403"; // pick your favorite Seattle stop
+const DEFAULT_STOP_ID = "1_75403";
 
 function App() {
   const [stopId, setStopId] = useState(DEFAULT_STOP_ID);
   const { data, loading, error } = useArrivals(stopId);
 
-  return (
-    <div style={{ padding: "1rem", fontFamily: "system-ui" }}>
-      <h1>Seattle Transit Dashboard</h1>
+  const formatEta = (seconds: number): { value: string; isNow: boolean } => {
+    const minutes = Math.round(seconds / 60);
+    if (minutes <= 0) {
+      return { value: "NOW", isNow: true };
+    }
+    return { value: String(minutes), isNow: false };
+  };
 
-      <label>
-        Stop ID:
+  const getStatusDotClass = () => {
+    if (error) return "status-dot error";
+    if (loading) return "status-dot loading";
+    return "status-dot";
+  };
+
+  const getStatusText = () => {
+    if (error) return "Error";
+    if (loading) return "Updating";
+    return "Live";
+  };
+
+  return (
+    <>
+      <div className="stop-selector">
+        <label htmlFor="stop-input">Stop ID:</label>
         <input
+          id="stop-input"
+          className="stop-input"
           value={stopId}
           onChange={(e) => setStopId(e.target.value)}
-          style={{ marginLeft: "0.5rem" }}
+          placeholder="Enter stop ID"
         />
-      </label>
+      </div>
 
-      {loading && <p>Loading arrivals…</p>}
-      {error && <p style={{ color: "red" }}>Error: {error.message}</p>}
+      <div className="transit-sign">
+        <div className="sign-header">
+          <h1 className="sign-title">Arrivals</h1>
+          <div className="sign-status">
+            <span className={getStatusDotClass()} />
+            <span>{getStatusText()}</span>
+          </div>
+        </div>
 
-      {data && data.length === 0 && !loading && <p>No upcoming arrivals</p>}
+        <div className="arrivals-display">
+          {error && (
+            <div className="sign-message error">
+              Connection Error
+            </div>
+          )}
 
-      {data && data.length > 0 && (
-        <table style={{ marginTop: "1rem", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: "left", padding: "0.5rem" }}>Route</th>
-              <th style={{ textAlign: "left", padding: "0.5rem" }}>Headsign</th>
-              <th style={{ textAlign: "left", padding: "0.5rem" }}>ETA</th>
-              <th style={{ textAlign: "left", padding: "0.5rem" }}>Predicted?</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((a) => (
-              <tr key={`${a.routeId}-${a.arrivalTimeEpochMs}`}>
-                <td style={{ padding: "0.5rem" }}>{a.routeShortName}</td>
-                <td style={{ padding: "0.5rem" }}>{a.headsign}</td>
-                <td style={{ padding: "0.5rem" }}>
-                  {Math.max(0, Math.round(a.etaSeconds / 60))} min
-                </td>
-                <td style={{ padding: "0.5rem" }}>
-                  {a.predicted ? "Yes" : "No"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+          {!error && loading && !data && (
+            <div className="sign-message">
+              Loading...
+            </div>
+          )}
+
+          {!error && data && data.length === 0 && (
+            <div className="sign-message">
+              No Scheduled Arrivals
+            </div>
+          )}
+
+          {!error && data && data.length > 0 && (
+            <>
+              {data.map((arrival) => {
+                const eta = formatEta(arrival.etaSeconds);
+                return (
+                  <div
+                    key={`${arrival.routeId}-${arrival.arrivalTimeEpochMs}`}
+                    className={`arrival-row ${!arrival.predicted ? "scheduled" : ""}`}
+                  >
+                    <div className="route-badge">
+                      {arrival.routeShortName}
+                    </div>
+                    <div className="destination">
+                      {arrival.headsign}
+                    </div>
+                    <div className="eta">
+                      <div className={`eta-minutes ${eta.isNow ? "eta-now" : ""}`}>
+                        {eta.value}
+                      </div>
+                      <div className="eta-label">
+                        {eta.isNow ? "" : "min"}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </div>
+
+        <div className="sign-footer">
+          <span>Sound Transit</span>
+          <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        </div>
+      </div>
+    </>
   );
 }
 
