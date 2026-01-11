@@ -12,23 +12,21 @@ interface StopGroupConfig {
   stops: StopConfig[];
 }
 
-// Default stop groups - can be customized
-const DEFAULT_STOP_GROUPS: StopGroupConfig[] = [
-  {
-    name: "S Jackson St & 18th Ave",
-    stops: [
-      { id: "1_11980", name: "Eastbound" },
-      { id: "1_11940", name: "Westbound" },
-    ],
-  },
-  {
-    name: "Rainier Ave S & Charles",
-    stops: [
-      { id: "1_8494", name: "NW bound (Downtown)" },
-      { id: "1_8590", name: "SE bound (Rainier Beach)" },
-    ],
-  },
-];
+// Load stop groups from environment variable or use empty array
+function loadDefaultStopGroups(): StopGroupConfig[] {
+  const envConfig = import.meta.env.VITE_STOP_GROUPS;
+  if (!envConfig) {
+    return [];
+  }
+  try {
+    return JSON.parse(envConfig) as StopGroupConfig[];
+  } catch (e) {
+    console.error("Failed to parse VITE_STOP_GROUPS:", e);
+    return [];
+  }
+}
+
+const DEFAULT_STOP_GROUPS: StopGroupConfig[] = loadDefaultStopGroups();
 
 interface DirectionGroup {
   headsign: string;
@@ -270,7 +268,10 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1 className="app-title">Seattle Transit</h1>
+        <h1 className="app-title">{import.meta.env.VITE_APP_TITLE || "Transit"}</h1>
+        {import.meta.env.VITE_APP_SUBTITLE && (
+          <p className="app-subtitle">{import.meta.env.VITE_APP_SUBTITLE}</p>
+        )}
       </header>
 
       <div className="stops-grid">
