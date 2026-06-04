@@ -231,7 +231,7 @@ function StopGroupSign({ group }: { group: StopGroupConfig }) {
       </div>
 
       <div className="sign-footer">
-        <span>{group.stops.map((s) => s.id.replace("1_", "#")).join(" / ")}</span>
+        <span>{group.stops.map((s) => s.name).join(" / ")}</span>
         <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
       </div>
     </div>
