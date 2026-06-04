@@ -1,6 +1,9 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import "./App.css";
-import { api, type Arrival } from "./api/client";
+import type { StopGroupConfig } from "./types";
+import { loadDefaultStopGroups } from "./utils/arrivals";
+import { StopGroupSign } from "./components/StopGroupSign";
+import { AddStopForm } from "./components/AddStopForm";
 
 interface StopConfig {
   id: string;
@@ -240,25 +243,9 @@ function StopGroupSign({ group }: { group: StopGroupConfig }) {
 
 function App() {
   const [stopGroups, setStopGroups] = useState<StopGroupConfig[]>(DEFAULT_STOP_GROUPS);
-  const [newGroupName, setNewGroupName] = useState("");
-  const [newStopIds, setNewStopIds] = useState("");
 
-  const addStopGroup = () => {
-    if (newGroupName.trim() && newStopIds.trim()) {
-      const ids = newStopIds.split(",").map((id) => {
-        const trimmed = id.trim();
-        return trimmed.startsWith("1_") ? trimmed : `1_${trimmed}`;
-      });
-
-      const newGroup: StopGroupConfig = {
-        name: newGroupName.trim(),
-        stops: ids.map((id, i) => ({ id, name: `Stop ${i + 1}` })),
-      };
-
-      setStopGroups([...stopGroups, newGroup]);
-      setNewGroupName("");
-      setNewStopIds("");
-    }
+  const addStopGroup = (group: StopGroupConfig) => {
+    setStopGroups([...stopGroups, group]);
   };
 
   const removeStopGroup = (index: number) => {
@@ -289,27 +276,7 @@ function App() {
         ))}
       </div>
 
-      <div className="add-stop-section">
-        <div className="add-stop-form">
-          <input
-            className="stop-input stop-name-input"
-            value={newGroupName}
-            onChange={(e) => setNewGroupName(e.target.value)}
-            placeholder="Location name"
-            onKeyDown={(e) => e.key === "Enter" && addStopGroup()}
-          />
-          <input
-            className="stop-input"
-            value={newStopIds}
-            onChange={(e) => setNewStopIds(e.target.value)}
-            placeholder="Stop IDs (comma separated)"
-            onKeyDown={(e) => e.key === "Enter" && addStopGroup()}
-          />
-          <button className="add-stop-btn" onClick={addStopGroup}>
-            Add Stop
-          </button>
-        </div>
-      </div>
+      <AddStopForm onAdd={addStopGroup} />
     </div>
   );
 }
